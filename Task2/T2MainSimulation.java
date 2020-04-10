@@ -21,7 +21,7 @@ public class T2MainSimulation extends T2GlobalSimulation{
     	}
 		
     	// Printing the result of the simulation, in this case a mean value
-		System.out.println(1.0*actState.accumulated/actState.noMeasurements + " - no mess: " + actState.noMeasurements);
+		System.out.println("Avg. no customers " + 1.0*actState.accumulated/actState.noMeasurements + " - no mess: " + actState.noMeasurements);
 		actState.W.close();
 	}
 }

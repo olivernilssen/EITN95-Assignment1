@@ -9,6 +9,8 @@ class T2State extends T2GlobalSimulation{
 	public int noQueue = 0, jobA = 0, jobB = 0, inDelay = 0, accumulated = 0, noMeasurements = 0, totalarrivals = 0, collected = 0;
 	public boolean jobRunning = false;
 
+	T2Queue <Integer> queue = new T2QueueList<Integer>();
+
 	Random slump = new Random(); // This is just a random number generator
 
 	//https://stackoverflow.com/questions/2206199/how-do-i-generate-discrete-random-events-with-a-poisson-distribution
@@ -25,20 +27,11 @@ class T2State extends T2GlobalSimulation{
 			case ARRIVAL:
 				arrival();
 				break;
-			case JOBA:
-				serviceA();
+			case SWAP:
+				swap();
 				break;
-			case ENDA:
-				endServiceA();
-				break;
-			case JOBB:
-				serviceB();
-				break;
-			case DELAY:
-				StopDelay();
-				break;
-			case ENDB:
-				endServiceB();
+			case DEPART:
+				departure();
 				break;
 			case MEASURE:
 				measure();
@@ -51,17 +44,19 @@ class T2State extends T2GlobalSimulation{
 	// things are getting more complicated than this.
 	private void arrival(){
 		totalarrivals++;
-		jobA++;
+		if (queue.size() == 0) swap();
 
-		//start job A if nothing else is in queue
-		//and no service is running
-		if (jobA >= 1 && jobB == 0 && !jobRunning)
-			insertEvent(JOBA, time);
-		else if (!jobRunning && jobB >= 1) {
-			insertEvent(JOBB, time);
-		}
-		//slump.nextDouble()
+		queue.insert(JOBA, time);
+
 		insertEvent(ARRIVAL, time + poissonRandomInterarrivalDelay(lambda));
+	}
+
+	private void swap(){
+		
+	}
+
+	private void departure(){
+
 	}
 
 	private void serviceA () {
@@ -105,7 +100,7 @@ class T2State extends T2GlobalSimulation{
 	private void endServiceB(){
 		jobB--;
 		jobRunning = false;
-
+  
 		if(jobB >= 1 && !jobRunning) 
 			insertEvent(JOBB, time);
 		else if (jobA >= 1 && !jobRunning)
