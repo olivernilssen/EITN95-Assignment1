@@ -7,4 +7,5 @@ class T3Event{
 	public double eventTime;
 	public int eventType;
 	public T3Event next;
+	public double startTime;
 }

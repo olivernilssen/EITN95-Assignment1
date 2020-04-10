@@ -11,11 +11,12 @@ public class T3EventListClass {
 	
 	// The method insertEvent creates a new event, and searches the list of events for the 
 	// right place to put the new event.
-	public void InsertEvent(int type, double TimeOfEvent) {
+	public void InsertEvent(int type, double TimeOfEvent, double startTime) {
  	T3Event dummy, predummy;
 	T3Event newEvent = new T3Event();
  	newEvent.eventType = type;
 	newEvent.eventTime = TimeOfEvent;
+	newEvent.startTime = startTime; 
  	predummy = list;
  	dummy = list.next;
  	while ((dummy.eventTime < newEvent.eventTime) & (dummy != last)){

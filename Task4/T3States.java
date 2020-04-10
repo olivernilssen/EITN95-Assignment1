@@ -8,8 +8,6 @@ class T3State extends T3GlobalSimulation{
 	public int numbQ1 = 0, numbQ2 = 0,  accumulated = 0, noMeasurements = 0, totalArrivals = 0;
 	public double accumulatedStart = 0;
 	public int leftQ2 = 0;
-	T3Queue <Integer> Q1 = new T3QueueList<Integer>();
-	T3Queue <Integer> Q2 = new T3QueueList<Integer>();
 
 	Random slump = new Random(); // This is just a random number generator
 	
@@ -21,10 +19,10 @@ class T3State extends T3GlobalSimulation{
 				arrival();
 				break;
 			case DEPART1:
-				departure1();
+				departure1(x.startTime);
 				break;
 			case DEPART2:
-				departure2();
+				departure2(x.startTime);
 				break;
 			case MEASURE:
 				measure();
@@ -36,42 +34,38 @@ class T3State extends T3GlobalSimulation{
 	// have been placed in the case in treatEvent, but often it is simpler to write a method if 
 	// things are getting more complicated than this.
 	private void arrival(){
+		numbQ1++;
 		totalArrivals++;
-		if (Q1.size() == 0)
-			insertEvent(DEPART1, time + 1.0*slump.nextDouble());
 
-		Q1.insert(totalArrivals, time);
-				
-		insertEvent(ARRIVAL, time + 1.5*slump.nextDouble());
+		if (numbQ1 == 1)
+			insertEvent(DEPART1, time + 1.0*slump.nextDouble(), time);
+		
+		insertEvent(ARRIVAL, time + 1.1*slump.nextDouble(), time + 1.1*slump.nextDouble());
 	}
 	
-	private void departure1(){
-		Q2.insert(Q1.jobnr(), Q1.startTime());
-		Q1.delete();
-
-		if (Q2.size() == 1)
-			insertEvent(DEPART2, time + 1.0*slump.nextDouble());
-		if (Q1.size() > 0)
-			insertEvent(DEPART1, time + 1.0*slump.nextDouble());
+	private void departure1(Double startTime){
+		numbQ1--;
+		numbQ2++;
+		if (numbQ2 == 1)
+			insertEvent(DEPART2, time + 1.0*slump.nextDouble(), startTime);
+		if (numbQ1 >= 1)
+			insertEvent(DEPART1, time + 1.0*slump.nextDouble(), startTime);
 	}
 
-	private void departure2(){
-		double timeSpent = time - Q2.startTime();
-		accumulatedStart += timeSpent;
-		// System.out.println("jobnr " + Q2.jobnr() + " came at time: " + Q2.startTime() + " and left at: " + time);
-		// System.out.println("leftTime: " + timeSpent);
-		Q2.delete();
-
-		if (Q2.size() > 0)
-			insertEvent(DEPART2, time + 1.0*slump.nextDouble());
+	private void departure2(Double startTime){
+		numbQ2--;
+		if (numbQ2 >= 1)
+			insertEvent(DEPART2, time + 1.0*slump.nextDouble(), startTime);
 		
+		double timeBetween = time - startTime;
+		accumulatedStart += timeBetween;
 		leftQ2++;
-		//System.out.println("start: " + + " end: " + time);
+		//System.out.println("start: " + startTime + " end: " + time);
 	}
 	
 	private void measure(){
-		accumulated += Q1.size() + Q2.size();
+		accumulated += numbQ2 + numbQ1;
 		noMeasurements++;
-		insertEvent(MEASURE, time + 1);
+		insertEvent(MEASURE, time + 1, 0);
 	}
 }

@@ -7,9 +7,8 @@ public class T3GlobalSimulation{
 	
 	public static final int ARRIVAL = 1, DEPART1 = 2, DEPART2 = 3, MEASURE = 4; // The events, add or remove if needed!
 	public static double time = 0; // The global time variable
-	public static int JOB1 = 1, JOB2 = 2;
 	public static T3EventListClass eventList = new T3EventListClass(); // The event list used in the program
-	public static void insertEvent(int type, double TimeOfEvent){  // Just to be able to skip dot notation
-		eventList.InsertEvent(type, TimeOfEvent);
+	public static void insertEvent(int type, double TimeOfEvent, double startTime){  // Just to be able to skip dot notation
+		eventList.InsertEvent(type, TimeOfEvent, startTime);
 	}
 }
