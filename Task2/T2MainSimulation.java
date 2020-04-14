@@ -1,12 +1,11 @@
 import java.util.*;
 import java.io.*;
 
-
 public class T2MainSimulation extends T2GlobalSimulation{
  
-    public static void main(String[] args) throws IOException {
+    public static <Item> void main(String[] args) throws IOException {
     	T2Event actEvent;
-    	T2State actState = new T2State(); // The state that shoud be used
+    	T2State <Item> actState = new T2State<Item>(); // The state that shoud be used
     	// Some events must be put in the event list at the beginning
         insertEvent(ARRIVAL, 0);  
         insertEvent(MEASURE, 0.1);
@@ -16,12 +15,11 @@ public class T2MainSimulation extends T2GlobalSimulation{
     		actEvent = T2eventList.fetchEvent();
     		time = actEvent.eventTime;
 			actState.treatEvent(actEvent);
-			//System.out.println("At time :" + time + " Event: " + actEvent.eventType);
-			//System.out.println("Type A: " + actState.jobA + " Type B: " + actState.jobB + " Indelay: " + actState.inDelay);
-    	}
+	 	}
 		
     	// Printing the result of the simulation, in this case a mean value
-		System.out.println("Avg. no customers " + 1.0*actState.accumulated/actState.noMeasurements + " - no mess: " + actState.noMeasurements);
+		System.out.println("Avg. no customers " + 1.0*actState.accumulated/actState.noMeasurements + " - Measurments: " + actState.noMeasurements);
+		System.out.println("Customers left queue " + actState.leaving);
 		actState.W.close();
 	}
 }

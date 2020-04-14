@@ -42,7 +42,7 @@ class T3State extends T3GlobalSimulation{
 		if (Q1.size() == 1)
 			insertEvent(DEPART1, time + 1.0*slump.nextDouble());
 		
-		insertEvent(ARRIVAL, time + 2*slump.nextDouble());
+		insertEvent(ARRIVAL, time + 2.0*slump.nextDouble());
 	}
 	
 	private void departure1(){
@@ -58,8 +58,6 @@ class T3State extends T3GlobalSimulation{
 	private void departure2(){
 		double timeSpent = time - Q2.startTime();
 		accumulatedStart += timeSpent;
-		// System.out.println("jobnr " + Q2.jobnr() + " came at time: " + Q2.startTime() + " and left at: " + time)
-		// System.out.println("leftTime: " + timeSpent);
 		Q2.delete();
 
 		if (Q2.size() >= 1)
@@ -72,6 +70,6 @@ class T3State extends T3GlobalSimulation{
 	private void measure(){
 		accumulated += Q1.size() + Q2.size();
 		noMeasurements++;
-		insertEvent(MEASURE, time + 1);
+		insertEvent(MEASURE, time + 0.5);
 	}
 }

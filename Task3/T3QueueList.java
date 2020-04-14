@@ -12,6 +12,7 @@ class T3QueueList <Item> extends T3GlobalSimulation implements T3Queue <Item>
     Item item;
     Double startTime;
     Customer next;
+    
   }
  
   //Zero argument constructor

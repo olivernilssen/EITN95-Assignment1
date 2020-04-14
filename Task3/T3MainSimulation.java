@@ -12,7 +12,7 @@ public class T3MainSimulation extends T3GlobalSimulation{
         insertEvent(MEASURE, 1);
         
         // The main simulation loop
-    	while (time < 150){
+    	while (time < 1000){
     		actEvent = eventList.fetchEvent();
 			time = actEvent.eventTime;
 			actState.treatEvent(actEvent);
@@ -21,7 +21,7 @@ public class T3MainSimulation extends T3GlobalSimulation{
     	}
 	
     	// Printing the result of the simulation, in this case a mean value
-		System.out.println("Avg Time in queue " + 1.0*actState.accumulated/actState.noMeasurements);
+		System.out.println("Avg people in queue " + 1.0*actState.accumulated/actState.noMeasurements);
 		System.out.println("time in queue " + 1.0*actState.accumulatedStart/actState.leftQ2);
 	}
 }

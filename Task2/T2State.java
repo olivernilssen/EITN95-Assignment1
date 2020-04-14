@@ -1,15 +1,15 @@
 import java.util.*;
 import java.io.*;
 
-class T2State extends T2GlobalSimulation{
-	
+class T2State <Item> extends T2GlobalSimulation {
 	// Here follows the state variables and other variables that might be needed
 	// e.g. for measurements
-	private double Xa = 0.002, Xb = 0.004, d = 1, lambda = 150, m = 0.1;
-	public int noQueue = 0, jobA = 0, jobB = 0, inDelay = 0, accumulated = 0, noMeasurements = 0, totalarrivals = 0, collected = 0;
-	public boolean jobRunning = false;
+	private double d = 1, lambda = 150, m = 0.1;
+	public int accumulated = 0, noMeasurements = 0, arrivalNumber = 0, leaving = 0;
+	public boolean jobArunning = false, jobBrunning = false;
 
 	T2Queue <Integer> queue = new T2QueueList<Integer>();
+	T2Queue <Integer> delayqueue = new T2QueueList<Integer>();
 
 	Random slump = new Random(); // This is just a random number generator
 
@@ -18,7 +18,7 @@ class T2State extends T2GlobalSimulation{
 		return (Math.log(1.0-Math.random())/-L);
 	}
 	
-	T2SimpleFileWriter W = new T2SimpleFileWriter("Task2/customersB.m", false);
+	T2SimpleFileWriter W = new T2SimpleFileWriter("Task2/customersA.m", false);
 
 	// The following method is called by the main program each time a new event has been fetched
 	// from the event list in the main loop. 
@@ -27,11 +27,11 @@ class T2State extends T2GlobalSimulation{
 			case ARRIVAL:
 				arrival();
 				break;
-			case SWAP:
-				swap();
+			case ACTION:
+				action();
 				break;
-			case DEPART:
-				departure();
+			case DELAY:
+				delay();
 				break;
 			case MEASURE:
 				measure();
@@ -43,76 +43,75 @@ class T2State extends T2GlobalSimulation{
 	// have been placed in the case in treatEvent, but often it is simpler to write a method if 
 	// things are getting more complicated than this.
 	private void arrival(){
-		totalarrivals++;
-		if (queue.size() == 0) swap();
-
-		queue.insert(JOBA, time);
-
+		arrivalNumber++;
+		// System.out.println("new arrival " + arrivalNumber);
+		queue.insert(arrivalNumber, JOBA, time, jobBrunning);
+		
+		if (queue.size() == 1 && !jobArunning && !jobBrunning) {
+			insertEvent(ACTION, time + queue.actionTime());
+			if(queue.priority() == JOBB) {
+				jobBrunning = true;
+			}
+			else {
+				jobArunning = true;
+			}
+		}
 		insertEvent(ARRIVAL, time + poissonRandomInterarrivalDelay(lambda));
 	}
 
-	private void swap(){
+	private void action(){
+		// System.out.println("... Qs: " + queue.size());
+		// for (int i : queue){
+		// 	System.out.println(i);
+		// }
+
+		int jobPriority = queue.priority();
 		
-	}
-
-	private void departure(){
-
-	}
-
-	private void serviceA () {
-		jobRunning = true;
-
-		//even for when serviceA finishes
-		insertEvent(ENDA, time + Xa);
-	}
-
-	private void endServiceA(){
-		jobA--;
-		jobRunning = false;
-		inDelay++;
-
-		insertEvent(DELAY, time +  d);
-
-		if (jobB >= 1 && !jobRunning){
-			insertEvent(JOBB, time);
+		if(jobPriority == JOBA){
+			double [] removed = queue.delete();
+			delayqueue.insert((int) removed[0], 0, removed[1], false);
+			insertEvent(DELAY, time + d);
 		}
-		else if (jobA >= 1 && !jobRunning) {
-			insertEvent(JOBA, time);
+		else if (jobPriority == JOBB){
+			queue.delete();
+			leaving++;
+		}
+
+		jobArunning = false;
+		jobBrunning = false;
+
+		if (!queue.isEmpty()) {
+			insertEvent(ACTION, time + queue.actionTime());
+			if(queue.priority() == JOBB) {
+				jobBrunning = true;
+			}
+			else {
+				jobArunning = true;
+			}
 		}
 	}
 
-	private void StopDelay() {
-		inDelay--;
-		jobB++;
+	private void delay(){
+		double [] endDelay = delayqueue.delete();
+		queue.insert((int) endDelay[0], JOBB, endDelay[1], jobBrunning);
 
-		if (!jobRunning && jobB >= 1)
-			insertEvent(JOBB, time);
-		else if (jobA >= 1 && !jobRunning && jobB == 0)
-			insertEvent(JOBA, time);
-	}
-
-	private void serviceB(){
-		jobRunning = true;
-		
-		insertEvent(ENDB, time + Xb);
-	}
-
-	private void endServiceB(){
-		jobB--;
-		jobRunning = false;
-  
-		if(jobB >= 1 && !jobRunning) 
-			insertEvent(JOBB, time);
-		else if (jobA >= 1 && !jobRunning)
-			insertEvent(JOBA, time);
+		if (queue.size() == 1 && !jobArunning && !jobBrunning){
+			insertEvent(ACTION, time + queue.actionTime());
+			
+			if(queue.priority() == JOBB) {
+				jobBrunning = true;
+			}
+			else {
+				jobArunning = true;
+			}
+		}
 	}
 	
 	private void measure(){
-		accumulated += jobA + jobB;
+		accumulated += queue.size();
 		noMeasurements++;
-		collected = jobA + jobB;
 
-		W.println(String.valueOf(collected));
+		W.println(String.valueOf(queue.size()));
 
 		insertEvent(MEASURE, time + m);
 	}
