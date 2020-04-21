@@ -4,9 +4,9 @@ import java.io.*;
 class T2State <Item> extends T2GlobalSimulation {
 	// Here follows the state variables and other variables that might be needed
 	// e.g. for measurements
-	private double d = 1, lambda = 150, m = 0.1;
-	public int accumulated = 0, noMeasurements = 0, arrivalNumber = 0, leaving = 0;
-	public boolean jobArunning = false, jobBrunning = false;
+	private double d = 1, lambda = 150, m = 0.1, mean = 0;
+	public int accumulated = 0, noMeasurements = 0, unsteadyMeasurment = 0, arrivalNumber = 0, leaving = 0, steady = 0;
+	public boolean jobArunning = false, jobBrunning = false, warmup = true;
 
 	T2Queue <Integer> queue = new T2QueueList<Integer>();
 	T2Queue <Integer> delayqueue = new T2QueueList<Integer>();
@@ -70,7 +70,7 @@ class T2State <Item> extends T2GlobalSimulation {
 		if(jobPriority == JOBA){
 			double [] removed = queue.delete();
 			delayqueue.insert((int) removed[0], 0, removed[1], false);
-			insertEvent(DELAY, time + d);
+			insertEvent(DELAY, time + d*slump.nextDouble());
 		}
 		else if (jobPriority == JOBB){
 			queue.delete();
@@ -108,11 +108,37 @@ class T2State <Item> extends T2GlobalSimulation {
 	}
 	
 	private void measure(){
-		accumulated += queue.size();
-		noMeasurements++;
+		if (warmup){
+			// System.out.println("warmup == true");
+			unsteadyMeasurment++;
+			accumulated += queue.size();
+			double newMean = accumulated/unsteadyMeasurment;
+			
+			double variance = mean - newMean;
+			// System.out.println("variance between the means " + variance);
 
-		W.println(String.valueOf(queue.size()));
+			if ((variance <= 0 && variance > -10 ) || (variance >= 0 && variance < 10)){
+				steady++;
+			}
+			else{
+				steady = 0;
+			}
 
+			mean = newMean;
+
+			if(steady == 500){
+				warmup = false;
+				accumulated = 0;
+				noMeasurements = 0;
+			}
+		}
+		else {
+			accumulated += queue.size();
+			noMeasurements++;
+
+			W.println(String.valueOf(queue.size()));
+		}
+		
 		insertEvent(MEASURE, time + m);
 	}
 }

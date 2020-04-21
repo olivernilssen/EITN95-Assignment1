@@ -10,7 +10,7 @@ class T3QueueList <Item> extends T3GlobalSimulation implements T3Queue <Item>
   private class Customer
   { 
     Item item;
-    Double startTime;
+    double startTime;
     Customer next;
     
   }
@@ -44,6 +44,7 @@ class T3QueueList <Item> extends T3GlobalSimulation implements T3Queue <Item>
   //Add item to the end of the list.
   public void insert(Item item, double startTime)
   {
+    // System.out.println("Insertin" + item);
     Customer oldRear = rear;
     rear = new Customer();
     rear.item = item;
