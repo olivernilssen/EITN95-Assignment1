@@ -5,16 +5,17 @@ class T4State extends T4GlobalSimulation{
 	
 	// Here follows the state variables and other variables that might be needed
 	// e.g. for measurements
-	public int N = 1000, x = 100, lambda = 8, T = 1;
-	public int beingServed = 0, rejected = 0, finished = 0, accumulated = 0, noMeasurements = 0, totalArrivals = 0;
-	public double accumulatedStart = 0;
-	public int leftQ2 = 0;
+	public int N = 100, x = 10, lambda = 4, T = 4;
+	public int beingServed = 0, rejected = 0, finished = 0, accumulated = 0, 
+				noMeasurements = 0, unsteadyMeasurments, totalArrivals = 0, steady = 0;
+	public double accumulatedStart = 0, mean = 0;
+	public boolean warmup = true;
 
 	public double poisson(double L) {
 		return (Math.log(1.0-Math.random())/-L);
 	}
 
-	T2SimpleFileWriter W = new T2SimpleFileWriter("Task4/customers.m", false);
+	T2SimpleFileWriter W = new T2SimpleFileWriter("Task4/customers6.m", false);
 
 	Random slump = new Random(); // This is just a random number generator
 	
@@ -56,10 +57,29 @@ class T4State extends T4GlobalSimulation{
 	}
 	
 	private void measure(){
-		accumulated += beingServed;
-		noMeasurements++;
-		
-		W.println(String.valueOf(beingServed));
+		if (warmup){
+			unsteadyMeasurments++;
+			accumulated += beingServed;
+			double newMean = accumulated/unsteadyMeasurments;
+			double variance = mean - newMean;
+
+			if ((variance <= 0 && variance > -1 ) || (variance >= 0 && variance < 1)){ steady++;}
+			else{ steady = 0; }
+
+			mean = newMean;
+
+			if(steady == 250){
+				warmup = false;
+				accumulated = 0;
+				noMeasurements = 0;
+			}
+		}
+		else {
+			accumulated += beingServed;
+			noMeasurements++;
+
+			W.println(String.valueOf(beingServed));
+		}
 		
 		insertEvent(MEASURE, time + T);
 	}

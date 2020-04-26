@@ -28,6 +28,7 @@ public class T3MainSimulation extends T3GlobalSimulation{
 			actState.W.close();
 			double mean = 1.0*actState.accumulated/actState.noMeasurements;
 			float timeQ = (float) (1.0 * actState.accumulatedStart / actState.leftQ2);
+			
 			// // Printing the result of the simulation, in this case a mean value
 			// System.out.println("Avg people in queue " + 1.0*actState.accumulated/actState.noMeasurements);
 			// System.out.println("time in queue " + 1.0*actState.accumulatedStart/actState.leftQ2);

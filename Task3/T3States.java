@@ -6,6 +6,7 @@ class T3State extends T3GlobalSimulation{
 	// Here follows the state variables and other variables that might be needed
 	// e.g. for measurements
 	public int numbQ1 = 0, numbQ2 = 0,  accumulated = 0, noMeasurements = 0, totalArrivals = 0, steady = 0, unsteadyMeasurment = 0;
+	public int lambda = 1;
 	public double accumulatedStart = 0, mean = 0;
 	public boolean warmup = true, sched1Depart = false, sched2Depart = false;
 	public int leftQ2 = 0;
@@ -46,7 +47,8 @@ class T3State extends T3GlobalSimulation{
 		
 		if (Q1.size() == 1 && sched1Depart == false){
 			// System.out.println("schedule depart from Q1 "  + Q1.size());
-			insertEvent(DEPART1, time + 1.0*slump.nextDouble());
+			double arrivalt = Math.log(1-slump.nextDouble())/(-lambda); //NEED TO TEST THIS!!
+			insertEvent(DEPART1, time + arrivalt);
 			sched1Depart = true;
 		}
 		
