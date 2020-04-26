@@ -1,4 +1,3 @@
-import java.util.*;
 import java.io.*;
 
 public class T2MainSimulation extends T2GlobalSimulation{
@@ -11,15 +10,15 @@ public class T2MainSimulation extends T2GlobalSimulation{
         insertEvent(MEASURE, 0.1);
         
         // The main simulation loop
-    	while (actState.noMeasurements < 1000){
+    	while (actState.noMeasurements < 2000){
     		actEvent = T2eventList.fetchEvent();
     		time = actEvent.eventTime;
 			actState.treatEvent(actEvent);
 	 	}
 		
     	// Printing the result of the simulation, in this case a mean value
-		System.out.println("Avg. no customers " + 1.0*actState.accumulated/actState.noMeasurements + " - Measurments: " + actState.noMeasurements);
-		System.out.println("Customers left queue " + actState.leaving);
+		System.out.println("Avg. no customers " + 1.0*actState.accumulated/actState.noMeasurements);
+		//System.out.println("Customers left queue " + actState.leaving);
 		actState.W.close();
 	}
 }

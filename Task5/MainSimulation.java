@@ -1,4 +1,3 @@
-import java.util.*;
 import java.io.*;
 
 //It inherits Proc so that we can use time and the signal names without dot notation

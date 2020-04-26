@@ -1,12 +1,12 @@
 import java.util.*;
-import java.io.*;
 
 class T3State extends T3GlobalSimulation{
 	
 	// Here follows the state variables and other variables that might be needed
 	// e.g. for measurements
 	public int numbQ1 = 0, numbQ2 = 0,  accumulated = 0, noMeasurements = 0, totalArrivals = 0, steady = 0, unsteadyMeasurment = 0;
-	public int lambda = 1;
+	public int serviceT = 1;
+	public double arrival = 2.0;
 	public double accumulatedStart = 0, mean = 0;
 	public boolean warmup = true, sched1Depart = false, sched2Depart = false;
 	public int leftQ2 = 0;
@@ -16,6 +16,12 @@ class T3State extends T3GlobalSimulation{
 	
 	T3SimpleFileWriter W = new T3SimpleFileWriter("Task3/customers11.m", false);
 
+	public double getNextserivce() {
+		return Math.log(1-slump.nextDouble())/(-1/serviceT);
+	}
+	public double getNextArrival() {
+		return Math.log(1-slump.nextDouble())/(-1/arrival);
+	}
 	Random slump = new Random(); // This is just a random number generator
 	
 	// The following method is called by the main program each time a new event has been fetched
@@ -47,8 +53,8 @@ class T3State extends T3GlobalSimulation{
 		
 		if (Q1.size() == 1 && sched1Depart == false){
 			// System.out.println("schedule depart from Q1 "  + Q1.size());
-			double arrivalt = Math.log(1-slump.nextDouble())/(-lambda); //NEED TO TEST THIS!!
-			insertEvent(DEPART1, time + arrivalt);
+			 //NEED TO TEST THIS!!
+			insertEvent(DEPART1, time + getNextArrival());
 			sched1Depart = true;
 		}
 		
@@ -69,13 +75,13 @@ class T3State extends T3GlobalSimulation{
 
 			if (Q2.size() == 1 && sched2Depart == false){
 				// System.out.println("Inserting departure from Q2 - s: " + Q2.size());
-				insertEvent(DEPART2, time + 1.0*slump.nextDouble());
+				insertEvent(DEPART2, time + getNextserivce());
 				sched2Depart = true;
 			}
 			if (Q1.isEmpty() == false && sched1Depart == false){
 				// System.out.println("Inserting departure from Q1 - s: " + Q1.size());
 				sched1Depart = true;
-				insertEvent(DEPART1, time + 1.0*slump.nextDouble());
+				insertEvent(DEPART1, time + getNextserivce());
 			}
 		}
 	}
@@ -94,7 +100,7 @@ class T3State extends T3GlobalSimulation{
 
 			if (Q2.isEmpty() == false && sched2Depart == false){
 				// System.out.println("new departure from 2: " + Q2.size());
-				insertEvent(DEPART2, time + 1.0*slump.nextDouble());
+				insertEvent(DEPART2, time + getNextserivce());
 				sched2Depart = true;
 			}
 

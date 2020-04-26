@@ -1,5 +1,4 @@
 import java.util.*;
-import java.io.*;
 
 
 //It inherits Proc so that we can use time and the signal names without dot notation 
@@ -15,7 +14,7 @@ class Gen extends Proc{
 	public void TreatSignal(Signal x){
 		switch (x.signalType){
 			case READY:{
-				SignalList.SendSignal(ARRIVAL, chooseQueue(sendTo), time);
+				SignalList.SendSignal(ARRIVAL, chooseQueue(ROUNDROBIN), time);
 				SignalList.SendSignal(READY, this, time + lambda*slump.nextDouble());
 			} //(2.0/lambda)*slump.nextDouble() -> poisson?
 			break;

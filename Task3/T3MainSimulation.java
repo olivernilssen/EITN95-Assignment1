@@ -1,12 +1,11 @@
-import java.util.*;
 import java.io.*;
 
 
 public class T3MainSimulation extends T3GlobalSimulation{
  
     public static void main(String[] args) throws IOException {
-		double [] means = new double [50];
-		float [] timeSpent = new float[50];
+		double [] means = new double [1];
+		float [] timeSpent = new float[1];
 		int i = 0;
 		
 		while (i < means.length){
@@ -28,7 +27,7 @@ public class T3MainSimulation extends T3GlobalSimulation{
 			actState.W.close();
 			double mean = 1.0*actState.accumulated/actState.noMeasurements;
 			float timeQ = (float) (1.0 * actState.accumulatedStart / actState.leftQ2);
-			
+			System.out.println(mean + " " + timeQ);
 			// // Printing the result of the simulation, in this case a mean value
 			// System.out.println("Avg people in queue " + 1.0*actState.accumulated/actState.noMeasurements);
 			// System.out.println("time in queue " + 1.0*actState.accumulatedStart/actState.leftQ2);

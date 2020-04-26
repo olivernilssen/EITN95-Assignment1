@@ -1,24 +1,23 @@
 import java.util.*;
-import java.io.*;
+
 
 class T2State <Item> extends T2GlobalSimulation {
 	// Here follows the state variables and other variables that might be needed
-	// e.g. for measurements
+	// e.g. for measurements, runningjobs and lambda
 	private double d = 1, lambda = 150, m = 0.1, mean = 0;
-	public int accumulated = 0, noMeasurements = 0, unsteadyMeasurment = 0, arrivalNumber = 0, leaving = 0, steady = 0;
-	public boolean jobArunning = false, jobBrunning = false, warmup = true;
-
-	T2Queue <Integer> queue = new T2QueueList<Integer>();
-	T2Queue <Integer> delayqueue = new T2QueueList<Integer>();
+	public int accumulated = 0, noMeasurements = 0, unsteadyMeasurment = 0;
+	public int totalArrivals = 0, steady = 0;
+	public boolean Arunning = false, Brunning = true, warmup = true;
+	public int queue_A = 0, queue_B = 0;
+	public double Xa = 0.002, Xb = 0.004;
 
 	Random slump = new Random(); // This is just a random number generator
 
-	//https://stackoverflow.com/questions/2206199/how-do-i-generate-discrete-random-events-with-a-poisson-distribution
-	public double poissonRandomInterarrivalDelay(double L) {
+	public double poissonArrival(double L) {
 		return (Math.log(1.0-Math.random())/-L);
 	}
 	
-	T2SimpleFileWriter W = new T2SimpleFileWriter("Task2/customersA.m", false);
+	T2SimpleFileWriter W = new T2SimpleFileWriter("Task2/customers.m", false);
 
 	// The following method is called by the main program each time a new event has been fetched
 	// from the event list in the main loop. 
@@ -39,104 +38,79 @@ class T2State <Item> extends T2GlobalSimulation {
 		}
 	}
 	
-	// The following methods defines what should be done when an event takes place. This could
-	// have been placed in the case in treatEvent, but often it is simpler to write a method if 
-	// things are getting more complicated than this.
+	// The following methods defines what should be done when an event takes place. 
 	private void arrival(){
-		arrivalNumber++;
-		// System.out.println("new arrival " + arrivalNumber);
-		queue.insert(arrivalNumber, JOBA, time, jobBrunning);
-		
-		if (queue.size() == 1 && !jobArunning && !jobBrunning) {
-			insertEvent(ACTION, time + queue.actionTime());
-			if(queue.priority() == JOBB) {
-				jobBrunning = true;
-			}
-			else {
-				jobArunning = true;
-			}
+		totalArrivals++;
+		queue_A++;
+
+		if (queue_A == 1 && queue_B == 0){
+			insertEvent(ACTION, time + Xb);
+			Arunning = true;
 		}
-		insertEvent(ARRIVAL, time + poissonRandomInterarrivalDelay(lambda));
+
+		insertEvent(ARRIVAL, time + poissonArrival(lambda));
 	}
 
+	//depending on which job is first in the queue, decided which action to take
+	//if the first queue object is JOBA, then delete the job, if it is JOBA, 
+	//we put it in the delay queue and start an action to remove it from delay
 	private void action(){
-		// System.out.println("... Qs: " + queue.size());
-		// for (int i : queue){
-		// 	System.out.println(i);
-		// }
-
-		int jobPriority = queue.priority();
-		
-		if(jobPriority == JOBA){
-			double [] removed = queue.delete();
-			delayqueue.insert((int) removed[0], 0, removed[1], false);
-			insertEvent(DELAY, time + d*slump.nextDouble());
+		if (Arunning){
+			Arunning = false;
+			queue_A--;
+			
+			insertEvent(DELAY, time + d);
 		}
-		else if (jobPriority == JOBB){
-			queue.delete();
-			leaving++;
+		else if (Brunning){
+			Brunning = false;
+			queue_B--;
 		}
 
-		jobArunning = false;
-		jobBrunning = false;
-
-		if (!queue.isEmpty()) {
-			insertEvent(ACTION, time + queue.actionTime());
-			if(queue.priority() == JOBB) {
-				jobBrunning = true;
-			}
-			else {
-				jobArunning = true;
-			}
+		if (queue_B > 0){
+			Brunning = true;
+			insertEvent(ACTION, time + Xb);
+		}
+		else if(queue_A > 0){
+			Arunning = true;
+			insertEvent(ACTION, time + Xa);
 		}
 	}
 
 	private void delay(){
-		double [] endDelay = delayqueue.delete();
-		queue.insert((int) endDelay[0], JOBB, endDelay[1], jobBrunning);
+		queue_B++;
 
-		if (queue.size() == 1 && !jobArunning && !jobBrunning){
-			insertEvent(ACTION, time + queue.actionTime());
-			
-			if(queue.priority() == JOBB) {
-				jobBrunning = true;
-			}
-			else {
-				jobArunning = true;
-			}
+		if (!Arunning && !Brunning){
+			Brunning = true;
+			insertEvent(ACTION, time + Xb);
 		}
 	}
 	
 	private void measure(){
+		//check if warmup time is still true
 		if (warmup){
-			// System.out.println("warmup == true");
 			unsteadyMeasurment++;
-			accumulated += queue.size();
+			accumulated += queue_A + queue_B;
 			double newMean = accumulated/unsteadyMeasurment;
-			
 			double variance = mean - newMean;
-			// System.out.println("variance between the means " + variance);
 
-			if ((variance <= 0 && variance > -10 ) || (variance >= 0 && variance < 10)){
-				steady++;
-			}
-			else{
-				steady = 0;
-			}
+			if ((variance <= 0 && variance > -1 ) || (variance >= 0 && variance < 1)) steady++;
+			else steady = 0;
 
 			mean = newMean;
 
-			if(steady == 500){
+			//if we have been steady for more than 500 measurments, then start taking
+			//the real sampels
+			if(steady == 200){
 				warmup = false;
 				accumulated = 0;
 				noMeasurements = 0;
 			}
 		}
 		else {
-			accumulated += queue.size();
+			accumulated += queue_A + queue_B;
 			noMeasurements++;
 
-			W.println(String.valueOf(queue.size()));
+			W.println(String.valueOf(queue_A + queue_B));
 		}
 		
 		insertEvent(MEASURE, time + m);

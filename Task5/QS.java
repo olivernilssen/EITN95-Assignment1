@@ -1,5 +1,4 @@
 import java.util.*;
-import java.io.*;
 
 // This class defines a simple queuing system with one server. It inherits Proc so that we can use time and the
 // signal names without dot notation
@@ -11,9 +10,11 @@ class QS extends Proc{
 	Random slump = new Random();
 
 	//exponential arrival time, get next value
-	public double getNext() {
-		return  Math.log(1-slump.nextDouble())/(-lambda);
-	}
+	// public double getNext() {
+	// 	double test = Math.log(1-slump.nextDouble())/(-1/lambda);
+	// 	System.out.println(test);
+	// 	return  test;
+	// }
 
 	public void TreatSignal(Signal x){
 
@@ -21,7 +22,7 @@ class QS extends Proc{
 			case ARRIVAL:{
 				numberInQueue++;
 				if (numberInQueue == 1){
-					SignalList.SendSignal(READY, this, time + getNext());
+					SignalList.SendSignal(READY, this, time + Math.log(1-slump.nextDouble())/-(1/lambda));
 				}
 			} break;
 
@@ -31,7 +32,7 @@ class QS extends Proc{
 					SignalList.SendSignal(ARRIVAL, sendTo, time);
 				}
 				if (numberInQueue > 0){
-					SignalList.SendSignal(READY, this, time + getNext());
+					SignalList.SendSignal(READY, this, time + Math.log(1-slump.nextDouble())/-(1/lambda));
 				}
 			} break;
 
