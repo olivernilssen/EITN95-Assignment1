@@ -43,6 +43,5 @@ y = normpdf(x,mean4,std4);
 y2 = normpdf(x,mean5,std5);
 y3 = normpdf(x,mean6,std6);
 
-
 % plot(x,y,x,y2,x,y3, 'LineWidth',0.9);
 % plot(xvalue, Dy, xlong, Ey, xlong, Fy, 'LineWidth',0.9);

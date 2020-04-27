@@ -39,11 +39,11 @@ public class T3MainSimulation extends T3GlobalSimulation{
 		// for (double p : means) {
 		// 	System.out.print(p  + " ");
 		// }
-		System.out.println("done \n");
+
+		// System.out.println(" \n");
 
 		// for (float t : timeSpent) {
 		// 	System.out.print(t  + " ");
 		// }
-
 	}
 }

@@ -2,9 +2,9 @@ import java.io.*;
 
 public class T2MainSimulation extends T2GlobalSimulation{
  
-    public static <Item> void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
     	T2Event actEvent;
-    	T2State <Item> actState = new T2State<Item>(); // The state that shoud be used
+    	T2State actState = new T2State(); // The state that shoud be used
     	// Some events must be put in the event list at the beginning
         insertEvent(ARRIVAL, 0);  
         insertEvent(MEASURE, 0.1);

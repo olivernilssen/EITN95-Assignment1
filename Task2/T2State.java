@@ -1,13 +1,12 @@
 import java.util.*;
 
-
-class T2State <Item> extends T2GlobalSimulation {
+class T2State extends T2GlobalSimulation {
 	// Here follows the state variables and other variables that might be needed
 	// e.g. for measurements, runningjobs and lambda
 	private double d = 1, lambda = 150, m = 0.1, mean = 0;
 	public int accumulated = 0, noMeasurements = 0, unsteadyMeasurment = 0;
 	public int totalArrivals = 0, steady = 0;
-	public boolean Arunning = false, Brunning = true, warmup = true;
+	public boolean Arunning = false, Brunning = false, warmup = true;
 	public int queue_A = 0, queue_B = 0;
 	public double Xa = 0.002, Xb = 0.004;
 
@@ -17,7 +16,7 @@ class T2State <Item> extends T2GlobalSimulation {
 		return (Math.log(1.0-Math.random())/-L);
 	}
 	
-	T2SimpleFileWriter W = new T2SimpleFileWriter("Task2/customers.m", false);
+	T2SimpleFileWriter W = new T2SimpleFileWriter("Task2/customersB.m", false);
 
 	// The following method is called by the main program each time a new event has been fetched
 	// from the event list in the main loop. 
@@ -43,8 +42,8 @@ class T2State <Item> extends T2GlobalSimulation {
 		totalArrivals++;
 		queue_A++;
 
-		if (queue_A == 1 && queue_B == 0){
-			insertEvent(ACTION, time + Xb);
+		if (queue_A == 1 && Brunning == false && queue_B == 0){ // && queue_B == 0
+			insertEvent(ACTION, time + Xa);
 			Arunning = true;
 		}
 
@@ -65,7 +64,7 @@ class T2State <Item> extends T2GlobalSimulation {
 			Brunning = false;
 			queue_B--;
 		}
-
+		
 		if (queue_B > 0){
 			Brunning = true;
 			insertEvent(ACTION, time + Xb);
@@ -79,9 +78,15 @@ class T2State <Item> extends T2GlobalSimulation {
 	private void delay(){
 		queue_B++;
 
-		if (!Arunning && !Brunning){
-			Brunning = true;
-			insertEvent(ACTION, time + Xb);
+		if (!Arunning && !Brunning ){
+			if (queue_B > 0) {
+				Brunning = true;
+				insertEvent(ACTION, time + Xb);
+			}
+			else if(queue_A > 0){
+				Arunning = true;
+				insertEvent(ACTION, time + Xa);
+			}
 		}
 	}
 	
@@ -93,8 +98,12 @@ class T2State <Item> extends T2GlobalSimulation {
 			double newMean = accumulated/unsteadyMeasurment;
 			double variance = mean - newMean;
 
-			if ((variance <= 0 && variance > -1 ) || (variance >= 0 && variance < 1)) steady++;
-			else steady = 0;
+			if ((variance <= 0 && variance > -2) || (variance >= 0 && variance < 2)) {
+				steady++;
+			}
+			else {
+				steady = 0;
+			}
 
 			mean = newMean;
 

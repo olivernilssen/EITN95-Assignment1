@@ -15,20 +15,20 @@ public class SignalList{
 	}
 
 	public static void SendSignal(int type, Proc dest, double arrtime){
- 	Signal dummy, predummy;
- 	Signal newSignal = new Signal();
- 	newSignal.signalType = type;
- 	newSignal.destination = dest;
- 	newSignal.arrivalTime = arrtime;
- 	predummy = list;
- 	dummy = list.next;
- 	while ((dummy.arrivalTime < newSignal.arrivalTime) & (dummy != last)){
- 		predummy = dummy;
- 		dummy = dummy.next;
- 	}
- 	predummy.next = newSignal;
- 	newSignal.next = dummy;
- }
+		Signal dummy, predummy;
+		Signal newSignal = new Signal();
+		newSignal.signalType = type;
+		newSignal.destination = dest;
+		newSignal.arrivalTime = arrtime;
+		predummy = list;
+		dummy = list.next;
+		while ((dummy.arrivalTime < newSignal.arrivalTime) & (dummy != last)){
+			predummy = dummy;
+			dummy = dummy.next;
+		}
+		predummy.next = newSignal;
+		newSignal.next = dummy;
+	}
 
 	public static Signal FetchSignal(){
 		Signal dummy;

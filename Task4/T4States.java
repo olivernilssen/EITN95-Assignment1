@@ -10,11 +10,12 @@ class T4State extends T4GlobalSimulation{
 	public double accumulatedStart = 0, mean = 0;
 	public boolean warmup = true;
 
+	//calculate the arrival of next arrival from poisson
 	public double poisson(double L) {
 		return (Math.log(1.0-Math.random())/-L);
 	}
 
-	T2SimpleFileWriter W = new T2SimpleFileWriter("Task4/customers6.m", false);
+	T2SimpleFileWriter W = new T2SimpleFileWriter("Task4/customers1.m", false);
 
 	Random slump = new Random(); // This is just a random number generator
 	
@@ -34,9 +35,9 @@ class T4State extends T4GlobalSimulation{
 		}
 	}
 	
-	// The following methods defines what should be done when an event takes place. This could
-	// have been placed in the case in treatEvent, but often it is simpler to write a method if 
-	// things are getting more complicated than this.
+	//On arrival we check if the amount of customers being served exceeds
+	//the number of servers, if not we start serving otherwise reject. 
+	//Create new arrival event
 	private void arrival(){
 		totalArrivals++;
 
@@ -50,11 +51,13 @@ class T4State extends T4GlobalSimulation{
 		insertEvent(ARRIVAL, time + poisson(lambda));
 	}
 	
+	//Once departing, we remove amount of customers being served. 
 	private void departure(){
 		beingServed--;
 		finished++;
 	}
 	
+	//measure how many customers are being served in the system
 	private void measure(){
 		if (warmup){
 			unsteadyMeasurments++;
@@ -62,7 +65,7 @@ class T4State extends T4GlobalSimulation{
 			double newMean = accumulated/unsteadyMeasurments;
 			double variance = mean - newMean;
 
-			if ((variance <= 0 && variance > -1 ) || (variance >= 0 && variance < 1)){ steady++;}
+			if ((variance <= 0 && variance > -1 ) || (variance >= 0 && variance < 1)) { steady++;}
 			else{ steady = 0; }
 
 			mean = newMean;

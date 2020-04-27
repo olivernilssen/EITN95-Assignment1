@@ -4,9 +4,10 @@ class T3State extends T3GlobalSimulation{
 	
 	// Here follows the state variables and other variables that might be needed
 	// e.g. for measurements
-	public int numbQ1 = 0, numbQ2 = 0,  accumulated = 0, noMeasurements = 0, totalArrivals = 0, steady = 0, unsteadyMeasurment = 0;
+	public int numbQ1 = 0, numbQ2 = 0,  accumulated = 0, noMeasurements = 0; 
+	public int totalArrivals = 0, steady = 0, unsteadyMeasurment = 0;
 	public int serviceT = 1;
-	public double arrival = 2.0;
+	public double arrival = 1.1, m = 0.5;
 	public double accumulatedStart = 0, mean = 0;
 	public boolean warmup = true, sched1Depart = false, sched2Depart = false;
 	public int leftQ2 = 0;
@@ -16,12 +17,10 @@ class T3State extends T3GlobalSimulation{
 	
 	T3SimpleFileWriter W = new T3SimpleFileWriter("Task3/customers11.m", false);
 
-	public double getNextserivce() {
-		return Math.log(1-slump.nextDouble())/(-1/serviceT);
+	public double getExpo(double mean) {
+		return Math.log(1-slump.nextDouble())/(-1/mean);
 	}
-	public double getNextArrival() {
-		return Math.log(1-slump.nextDouble())/(-1/arrival);
-	}
+
 	Random slump = new Random(); // This is just a random number generator
 	
 	// The following method is called by the main program each time a new event has been fetched
@@ -43,70 +42,54 @@ class T3State extends T3GlobalSimulation{
 		}
 	}
 	
-	// The following methods defines what should be done when an event takes place. This could
-	// have been placed in the case in treatEvent, but often it is simpler to write a method if 
-	// things are getting more complicated than this.
+	//Insert arrival into queue1, start departure from queue 1 if equals 0.
+	//insert new arrival
 	private void arrival(){
-		// System.out.println("..Arrival..");
 		totalArrivals++;
 		Q1.insert(totalArrivals, time);
 		
 		if (Q1.size() == 1 && sched1Depart == false){
-			// System.out.println("schedule depart from Q1 "  + Q1.size());
-			 //NEED TO TEST THIS!!
-			insertEvent(DEPART1, time + getNextArrival());
+			insertEvent(DEPART1, time + getExpo(serviceT));
 			sched1Depart = true;
 		}
 		
-		insertEvent(ARRIVAL, time + 1.1*slump.nextDouble());
+		insertEvent(ARRIVAL, time + getExpo(arrival));
 	}
 	
+	//depart from one queue 1 to queue 2, keep values from first queue
+	//delete the customer from queue 1. 
+	//Start new departure from 2 (to initialise if it was 0)
+	//start new departure from 1 if the size is bigger than 0
 	private void departure1(){
-		// System.out.println("..depart 1..");
-		if (Q1.isEmpty()){
-			System.out.println("Something went wrong Q1");
+		sched1Depart = false;
+		Q2.insert(Q1.jobnr(), Q1.startTime());
+		Q1.delete();
+
+		if (Q2.size() == 1 && sched2Depart == false){
+			insertEvent(DEPART2, time + getExpo(serviceT));
+			sched2Depart = true;
 		}
-			else {
-			sched1Depart = false;
-			Q2.insert(Q1.jobnr(), Q1.startTime());
-			Q1.delete();
-
-			// System.out.println("inserting into q2 - s: " + Q2.size());
-
-			if (Q2.size() == 1 && sched2Depart == false){
-				// System.out.println("Inserting departure from Q2 - s: " + Q2.size());
-				insertEvent(DEPART2, time + getNextserivce());
-				sched2Depart = true;
-			}
-			if (Q1.isEmpty() == false && sched1Depart == false){
-				// System.out.println("Inserting departure from Q1 - s: " + Q1.size());
-				sched1Depart = true;
-				insertEvent(DEPART1, time + getNextserivce());
-			}
+		if (Q1.size() > 0 && sched1Depart == false){
+			sched1Depart = true;
+			insertEvent(DEPART1, time + getExpo(serviceT));
 		}
 	}
 
+	//Delete customer from queue, and if there is still someone 
+	//in the queue, start serving them and insert new departure 
 	private void departure2(){
-		// System.out.println("..depart 2..");
 		sched2Depart = false;
-		if (Q2.size() == 0){
-			System.out.println("something went wrong here");
+	
+		double timeSpent = time - Q2.startTime();
+		accumulatedStart += timeSpent;		
+		Q2.delete();
+
+		if (Q2.size() > 0 && sched2Depart == false){
+			insertEvent(DEPART2, time + getExpo(serviceT));
+			sched2Depart = true;
 		}
-		else{
 
-			double timeSpent = time - Q2.startTime();
-			accumulatedStart += timeSpent;		
-			Q2.delete();
-
-			if (Q2.isEmpty() == false && sched2Depart == false){
-				// System.out.println("new departure from 2: " + Q2.size());
-				insertEvent(DEPART2, time + getNextserivce());
-				sched2Depart = true;
-			}
-
-			leftQ2++;
-		}
-		//System.out.println("start: " + + " end: " + time);
+		leftQ2++;
 	}
 	
 	private void measure(){
@@ -116,9 +99,8 @@ class T3State extends T3GlobalSimulation{
 			double newMean = accumulated/unsteadyMeasurment;
 			
 			double variance = mean - newMean;
-			// System.out.println("variance between the means " + variance);
 
-			if ((variance <= 0 && variance > -2 ) || (variance >= 0 && variance < 2)){
+			if ((variance <= 0 && variance > -3 ) || (variance >= 0 && variance < 3)){
 				steady++;
 			}
 			else{
@@ -137,9 +119,9 @@ class T3State extends T3GlobalSimulation{
 			accumulated += Q1.size() + Q2.size();
 			noMeasurements++;
 
-			W.println(String.valueOf(Q1.size() + Q2.size()));
+			W.println(String.valueOf(accumulatedStart/leftQ2));
 		}
 		
-		insertEvent(MEASURE, time + 0.5);
+		insertEvent(MEASURE, time + m);
 	}
 }

@@ -10,33 +10,21 @@ public class MainSimulation extends Global{
 		Signal actSignal;
 		new SignalList();
 
-		QS Q1 = new QS();
-		Q1.Qnumb = 1;
-		allQueues[0] = Q1; 
-		QS Q2 = new QS();
-		Q2.Qnumb = 2;
-		allQueues[1] = Q2;
-		QS Q3 = new QS();
-		Q3.Qnumb = 3;
-		allQueues[2] = Q3;
-		QS Q4 = new QS();
-		Q4.Qnumb = 4;
-		allQueues[3] = Q4;
-		QS Q5 = new QS();
-		Q5.Qnumb = 5;
-		allQueues[4] = Q5;
-
-		for(QS q : allQueues){
-			q.sendTo = null;
-			SignalList.SendSignal(MEASURE, q, time);
-		}
-
 		// Here process instances are created (5 queues and one generator) and their
 		// parameters are given values.
 
+		//initialise the queues we are using and add them to the global 
+		//list allQueues.
+		for (int i = 0; i < allQueues.length; i++){
+			allQueues[i] = new QS();
+			allQueues[i].Qnumb = i + 1; //name of queue
+			allQueues[i].sendTo = null;
+			SignalList.SendSignal(MEASURE, allQueues[i], time);
+		}
+
 		Gen Generator = new Gen();
-		Generator.lambda = 0.12; // Generator sets uniform arrival time to be 0.12
-		// The generated customers shall be sent to Q1
+		Generator.lambda = 2.0; // Generator sets uniform arrival time to be 0.12
+		Generator.method = RAND; //choose which method to use for queue selection
 
 		// To start the simulation the first signals are put in the signal list
 		SignalList.SendSignal(READY, Generator, time);
@@ -46,17 +34,21 @@ public class MainSimulation extends Global{
 			actSignal = SignalList.FetchSignal();
 			time = actSignal.arrivalTime;
 			actSignal.destination.TreatSignal(actSignal);
-			// System.out.println("Q1: " + Q1.numberInQueue + " Q2: " + Q2.numberInQueue + " Q3: " + Q3.numberInQueue);
 		}
 
 		// Finally the result of the simulation is printed below:
-		double allAccumulated = 0;
-		double allMeasurments = 0;
+		double allAccumulated = 0, allMeasurments = 0, allTimes = 0, allLeft = 0;
+		
 		for (QS q : allQueues){
+			allTimes += q.timeSpent; 
+			allLeft += q.leftQ;
 			allAccumulated += q.accumulated;
 			allMeasurments += q.noMeasurements;
-			System.out.println("numb: " + q.Qnumb + " mean: " + q.accumulated/q.noMeasurements);
+			double mean = 1.0 * q.accumulated/q.noMeasurements;
+			System.out.println("numb: " + q.Qnumb + " mean: " + mean + " timespent " + (q.timeSpent/q.leftQ));
 		}
+
 		System.out.println("Mean number of customers in queuing system: " + 1.0 * allAccumulated / allMeasurments);
+		System.out.println("Mean number spent in queue: " + 1.0 * allTimes / allLeft);
 	}
 }
