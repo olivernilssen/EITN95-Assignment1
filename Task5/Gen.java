@@ -10,8 +10,9 @@ class Gen extends Proc{
 	public double lambda;  //uniform arrival time
 	public int method;
 
-	private double nextUniform(double mean){
-		return slump.nextDouble()*(lambda);
+	public double poissonArrival(double L) {
+		double arrivalRate = 1/(lambda/60);
+		return (Math.log(1.0-Math.random())/-(arrivalRate));
 	}
 
 	//What to do when a signal arrives
@@ -20,7 +21,7 @@ class Gen extends Proc{
 			case READY:{
 				Proc sendTo = chooseQueue(method);
 				SignalList.SendSignal(ARRIVAL, sendTo, time);
-				SignalList.SendSignal(READY, this, time + nextUniform(lambda));
+				SignalList.SendSignal(READY, this, time + poissonArrival(lambda));
 			}
 			break;
 		}

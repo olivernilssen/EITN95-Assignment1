@@ -23,7 +23,7 @@ public class MainSimulation extends Global{
 		}
 
 		Gen Generator = new Gen();
-		Generator.lambda = 2.0; // Generator sets uniform arrival time to be 0.12
+		Generator.lambda = 0.12; // Generator sets uniform arrival time to be 0.12
 		Generator.method = RAND; //choose which method to use for queue selection
 
 		// To start the simulation the first signals are put in the signal list

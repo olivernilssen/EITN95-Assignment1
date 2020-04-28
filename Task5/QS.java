@@ -11,6 +11,7 @@ class QS extends Proc{
 	public double serviceTime = 0.5, timeSpent = 0;
 	Random slump = new Random();
 
+	//queue too keep track of all customers
 	Queue<Customer> queue = new LinkedList<>();
 
 	//exponential arrival time, get next value
@@ -44,9 +45,9 @@ class QS extends Proc{
 
 			case MEASURE:{
 				noMeasurements++;
-				if(accumulated + queue.size() < 0) {
-					System.out.println("what the fuck? " + accumulated + " " + queue.size());
-				}
+				// if(accumulated + queue.size() < 0) {
+				// 	System.out.println("what the fuck? " + accumulated + " " + queue.size());
+				// }
 				accumulated += queue.size();
 				
 				SignalList.SendSignal(MEASURE, this, time + 2*slump.nextDouble());
