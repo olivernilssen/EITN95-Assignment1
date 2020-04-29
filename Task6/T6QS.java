@@ -40,7 +40,7 @@ class T6QS extends T6Proc{
 
 			case READY:{
 				T6Prescription removed = prescriptionQ.remove();
-				timeSpent += (time - removed.startTime);
+				timeSpent += (time - removed.getStart());
 				leftQ++;
 
 				if (prescriptionQ.size() > 0){
