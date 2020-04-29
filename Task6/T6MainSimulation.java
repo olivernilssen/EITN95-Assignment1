@@ -4,10 +4,12 @@ import java.io.*;
 public class T6MainSimulation extends T6Global{
 
 	public static void main(String[] args) throws IOException {
+		T6SimpleFileWriter TS = new T6SimpleFileWriter("Task6/timespent.m", false);
+		T6SimpleFileWriter TF = new T6SimpleFileWriter("Task6/timefinished.m", false);
 		// The signal list is started and actSignal is declaree. actSignal is the latest
 		// signal that has been fetched from thesignal list in the main loop below.
 		double batchWait = 0, allBatchesWait = 0;
-		double batchFinish = 0, allBatchesFinish = 0;
+		double allFinishwork = 0;
 		int i = 0, N = 1000; //i = iteration, N = days we want done
 		int batchSize = 10; //size of each batch
 		int count = 0; //to count what batch we are on right now
@@ -23,8 +25,8 @@ public class T6MainSimulation extends T6Global{
 
 		// This is the main loop - while not finished all perscriptions continue
 		while (i < N){
-			T6SignalList.SendSignal(READY, Generator, time);
 			try {
+				T6SignalList.SendSignal(READY, Generator, time);
 
 				while (!DAYOVER) {
 					actSignal = T6SignalList.FetchSignal();
@@ -32,11 +34,15 @@ public class T6MainSimulation extends T6Global{
 					actSignal.destination.TreatSignal(actSignal);
 				}
 
-				batchFinish += time;
+				// System.out.println(hrminsec((int)time, false) + time);
+				allFinishwork += time;
 				batchWait += (int)pharmacist.timeSpent/pharmacist.leftQ;
 				count++;
 				
+				TF.println(String.valueOf(time));
+				
 				if (count == batchSize){
+					TS.println(String.valueOf(batchWait/batchSize));
 					count = 0;
 					allBatchesWait += (batchWait/batchSize);
 					batchWait = 0;
@@ -54,7 +60,10 @@ public class T6MainSimulation extends T6Global{
 			}
 		}
 
-		String finishedDay = hrminsec((int)batchFinish/N, true);
+		TS.close();
+		TF.close();
+
+		String finishedDay = hrminsec((int)allFinishwork/N, true);
 		String WorkTime = hrminsec((int)allBatchesWait/(N/batchSize), false);
 
 		// Finally the result of the simulation is printed below:
@@ -63,7 +72,6 @@ public class T6MainSimulation extends T6Global{
 	}
 
 	public static String hrminsec(int timespent, boolean clock){
-		int numberofDays = (timespent / 86400 );
 		int numberOfHours = (timespent % 86400 ) / 3600;
 		int numberOfMinutes = ((timespent % 86400 ) % 3600 ) / 60;
 		int numberOfSeconds = ((timespent % 86400 ) % 3600 ) % 60;
