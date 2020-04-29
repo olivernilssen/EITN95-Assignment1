@@ -49,7 +49,7 @@ class State extends GlobalSimulation{
 	private void arrival(){
 		if((time/60) < endT) {
 			costumer++;
-			Q1. insert ( costumer , time);
+			Q1.insert ( costumer , time);
 			insertEvent ( DEPART , time + getDepart());
 		}
 		else {

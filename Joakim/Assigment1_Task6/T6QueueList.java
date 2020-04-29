@@ -22,14 +22,13 @@ Item >{
  }
  // Remove item from the beginning of the list .
  public Item delete (){
- Item item = front . item ;
- front = front . next ;
- if ( isEmpty ())
- {
- rear = null ;
- }
- size --;
- return item ;
+	Item item = front . item ;
+	front = front . next ;
+	if ( isEmpty ()){
+		rear = null ;
+	}
+	size --;
+	return item ;
 }
   public void insert ( Item item , double startTime ){
 	  // System . out. println (" Insertin " + item );

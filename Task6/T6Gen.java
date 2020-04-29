@@ -18,8 +18,13 @@ class T6Gen extends T6Proc{
 	public void TreatSignal(T6Signal x){
 		switch (x.signalType){
 			case READY:{
-				T6SignalList.SendSignal(ARRIVAL, sendTo, time);
-				T6SignalList.SendSignal(READY, this, time + poissonArrival(lambda));
+				double nextArrival = poissonArrival(lambda);
+				
+				if(time + nextArrival <= FINISHTIME && !finished){
+					ENDOFDAY = true;
+					T6SignalList.SendSignal(ARRIVAL, sendTo, time);
+					T6SignalList.SendSignal(READY, this, time + nextArrival);
+				}
 			}
 			break;
 		}

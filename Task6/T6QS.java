@@ -23,8 +23,6 @@ class T6QS extends T6Proc{
 
 	public void resetDay(){
 		timeSpent = 0;
-		accumulated = 0;
-		noMeasurements = 0;
 		leftQ = 0;
 		totalArrivals = 0;
 	}
@@ -35,10 +33,8 @@ class T6QS extends T6Proc{
 				totalArrivals++;
 				prescriptionQ.add(new T6Prescription(totalArrivals, time));
 				
-				if(time < ENDDAY){
-					if (prescriptionQ.size() == 1){
-						T6SignalList.SendSignal(READY, this, time + service());
-					}
+				if (prescriptionQ.size() == 1){
+					T6SignalList.SendSignal(READY, this, time + service());
 				}
 			} break;
 
@@ -50,8 +46,7 @@ class T6QS extends T6Proc{
 				if (prescriptionQ.size() > 0){
 					T6SignalList.SendSignal(READY, this, time + service());
 				}
-
-				if (prescriptionQ.size() == 0 && time >= ENDDAY){
+				else if (prescriptionQ.size() == 0 && ENDOFDAY){
 					finished = true;
 				}
 			} break;
