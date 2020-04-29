@@ -46,8 +46,8 @@ class T6QS extends T6Proc{
 				if (prescriptionQ.size() > 0){
 					T6SignalList.SendSignal(READY, this, time + service());
 				}
-				else if (prescriptionQ.size() == 0 && ENDOFDAY){
-					finished = true;
+				else if (prescriptionQ.size() == 0 && SHOPCLOSED){
+					DAYOVER = true;
 				}
 			} break;
 

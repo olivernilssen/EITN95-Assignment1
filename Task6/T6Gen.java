@@ -19,11 +19,13 @@ class T6Gen extends T6Proc{
 		switch (x.signalType){
 			case READY:{
 				double nextArrival = poissonArrival(lambda);
+				T6SignalList.SendSignal(ARRIVAL, sendTo, time);
 				
-				if(time + nextArrival <= FINISHTIME && !finished){
-					ENDOFDAY = true;
-					T6SignalList.SendSignal(ARRIVAL, sendTo, time);
+				if(time + nextArrival <= FINISHTIME){
 					T6SignalList.SendSignal(READY, this, time + nextArrival);
+				}
+				else {
+					SHOPCLOSED = true;
 				}
 			}
 			break;
