@@ -1,6 +1,6 @@
-//Components
 
-public class Comp {
+//Components
+public class Comp{
     private int id;
     private double breakdownTime = 0;
 	public String getId;

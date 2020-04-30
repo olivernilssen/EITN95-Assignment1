@@ -3,16 +3,16 @@ import java.util.*;
 //It inherits Proc so that we can use time and the signal names without dot notation 
 class Gen extends Proc{
 	//The random number generator is started:
-	Random slump = new Random();
-
+	public Random slump = new Random();
+	public double allR = 0, amountR = 0;
 	//There are two parameters:
 	public Proc sendTo;  //Says to which process we want to send customers
 	public double lambda;  //uniform arrival time
 	public int method;
 
-	public double poissonArrival(double L) {
-		double arrivalRate = 1/(lambda/60);
-		return (Math.log(1.0-Math.random())/-(arrivalRate));
+	public double arrival(double L) {
+		double random = slump.nextDouble()*(L*2); //lower-bound being 0 and upperbound being L*2
+		return (random);
 	}
 
 	//What to do when a signal arrives
@@ -21,7 +21,7 @@ class Gen extends Proc{
 			case READY:{
 				Proc sendTo = chooseQueue(method);
 				SignalList.SendSignal(ARRIVAL, sendTo, time);
-				SignalList.SendSignal(READY, this, time + poissonArrival(lambda));
+				SignalList.SendSignal(READY, this, time + arrival(lambda));
 			}
 			break;
 		}
