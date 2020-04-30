@@ -44,7 +44,7 @@ class Gen extends Proc{
 			if (RR > allQueues.length){RR = 1;}
 		}
 		//find shortest queue in all queues
-		else if (method == SHORTEST){
+		else if (method == SQF){
 			QS [] temp = new QS[5];
 			temp[0] = allQueues[0];
 			int i = 1;

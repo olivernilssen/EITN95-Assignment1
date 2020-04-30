@@ -8,7 +8,7 @@ T1_RR = fopen('timeinQ1-RR.m');
 y_T1_RR = fscanf(T1_RR, '%f');
 
 %SQF
-T1_SQF = fopen('timeinQ1-SQF.m');
+T1_SQF= fopen('timeinQ1-SQF.m');
 y_T1_SQF = fscanf(T1_SQF, '%f');
 
 %MEAN ARRIVAL 0.11
@@ -39,7 +39,7 @@ y_T3_SQF = fscanf(T3_SQF, '%f');
 
 %MEAN ARRIVAL 2.0
 %Random
-T4_random = fopen('timeinQ4-RAND.m');
+T4_random = fopen('timeinQ5-RAND.m');
 y_T4_RAND = fscanf(T4_random, '%f');
 
 %RR
@@ -48,5 +48,4 @@ y_T4_RR = fscanf(T4_RR, '%f');
 
 %SQF
 T4_SQF= fopen('timeinQ4-SQF.m');
-y_T4_SQF = fscanf(T4_SQF, '%f');
-
+y_T4_ = fscanf(T3_SQF, '%f');

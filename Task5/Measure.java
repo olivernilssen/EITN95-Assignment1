@@ -3,14 +3,18 @@ import java.util.Random;
 //this class is used to measure all batches in all queues and input it into a .m file
 public class Measure extends Proc {
     
-	SimpleFileWriter Cw = new SimpleFileWriter("Task5/customers1-random.m", false); //customer in queue 
-    SimpleFileWriter Tw = new SimpleFileWriter("Task5/timeinQ1-random.m", false); //time spent in queue
+	SimpleFileWriter Cw = new SimpleFileWriter("Task5/customers1-RAND.m", false); //customer in queue 
+    SimpleFileWriter Tw = new SimpleFileWriter("Task5/timeinQ1-RAND.m", false); //time spent in queue
 
 	//variables for measuring timespent and customers
-	private double accumulated = 0, accumulatedTime = 0;
-	private double noMeasurements = 0, noMeasurementsT = 0;
+	private double accumulated = 0;
 	private Random slump = new Random();
 
+	private int batchSizeT = 10, batchSizeC = 15;
+	private double batchT = 0, batchC = 0; 
+	private double allBatchT = 0, allBatchC = 0;
+	private double noBatchesT = 0, noBatchesC = 0;
+	private int countT = 0, countC = 0;
 
     public void TreatSignal(Signal x){
 		switch (x.signalType){
@@ -18,38 +22,54 @@ public class Measure extends Proc {
 				if (startMeasuring){	
 					measureCustomers();
 				}
+
+				SignalList.SendSignal(MEASUREC, this, time + 2*slump.nextDouble());
 			}
 			break;
 			case MEASURET:{
 				if (startMeasuring){	
 					measureTime();
 				}
+				SignalList.SendSignal(MEASURET, this, time + 2*slump.nextDouble());
 			}
 			break;
 		}
 	}
     
-    
 	private void measureCustomers(){
-		noMeasurements++; 
+		accumulated = 0;
 		for (QS q : allQueues){
 			accumulated += q.queue.size();
 		}
 
-		Cw.println(String.valueOf((accumulated/allQueues.length)/noMeasurements));
-
-		SignalList.SendSignal(MEASUREC, this, time + 2*slump.nextDouble());
-
+		batchC += accumulated;
+		countC++; 
+		if (countC > batchSizeC){
+			allBatchC += (batchC/batchSizeC);
+			noBatchesC++;
+			countC = 0;
+			batchC = 0;
+			Cw.println(String.valueOf(allBatchC/noBatchesC));
+		}
 	}
 
 	private void measureTime(){
-		noMeasurementsT++; 
+		accumulated = 0;
 		for (QS q : allQueues){
-			accumulatedTime += (q.allTimes/q.leftQ);
+			accumulated += (q.allTimes/q.leftQ);
 		}
 
-		Tw.println(String.valueOf((accumulatedTime/allQueues.length)/noMeasurementsT));
+		batchT += accumulated;
+		countT++; 
 
-		SignalList.SendSignal(MEASURET, this, time + 2*slump.nextDouble());
+		if (countT > batchSizeT){
+			allBatchT += (batchT/batchSizeT);
+			noBatchesT++;
+			double mean = (allBatchT);
+			countT = 0;
+			batchT = 0;
+			System.out.println(mean);
+			Tw.println(String.valueOf(allBatchT/noBatchesT));
+		}
 	}
 }

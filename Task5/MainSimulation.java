@@ -16,6 +16,8 @@ public class MainSimulation extends Global{
 		// parameters are given values.
 
 		Measure measure = new Measure();
+		SignalList.SendSignal(MEASUREC, measure, time);
+		SignalList.SendSignal(MEASURET, measure, time);
 		//initialise the queues we are using and add them to the global 
 		//list allQueues.
 		for (int i = 0; i < allQueues.length; i++){

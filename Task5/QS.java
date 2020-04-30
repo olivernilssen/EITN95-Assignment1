@@ -49,7 +49,7 @@ class QS extends Proc{
 
 			case READY:{
 				Customer removed = queue.remove();
-				
+
 				if(startMeasuring){
 					allTimes += (time - removed.startTime);
 					batchT += (time - removed.startTime);
@@ -59,7 +59,8 @@ class QS extends Proc{
 					if(countT > batchSize){
 						numBatchesT++;
 						allBatchesT += (batchT/batchSize);
-						countT = 0; batchT = 0;
+						countT = 0; 
+						batchT = 0;
 					}
 				}
 			
@@ -84,12 +85,12 @@ class QS extends Proc{
 			double newMean = accumulated/noMeasurements;
 			double variance = mean - newMean;
 
-			if ((variance <= 0 && variance > -0.5 ) || (variance >= 0 && variance < 0.5)) { steady++;}
+			if ((variance <= 0 && variance > -1 ) || (variance >= 0 && variance < 1)) { steady++;}
 			else{ steady = 0; }
 
 			mean = newMean;
 
-			if(steady == 500){
+			if(steady == 250){
 				warmup = false;
 				startMeasuring = true;
 				accumulated = 0;
@@ -107,6 +108,6 @@ class QS extends Proc{
 			}
 		}
 		
-		SignalList.SendSignal(MEASURE, this, time + 2*slump.nextDouble());
+		SignalList.SendSignal(MEASURE, this, time + m*slump.nextDouble());
 	}
 }
