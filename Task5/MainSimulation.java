@@ -29,8 +29,8 @@ public class MainSimulation extends Global{
 		}
 
 		Gen Generator = new Gen();
-		Generator.lambda = 0.12; // Generator sets uniform arrival time to be 0.12
-		Generator.method = RAND; //choose which method to use for queue selection
+		Generator.lambda = 1.5; // Generator sets uniform arrival time to be 0.12
+		Generator.method = ROUNDROBIN; //choose which method to use for queue selection
 
 		// To start the simulation the first signals are put in the signal list
 		SignalList.SendSignal(READY, Generator, time);

@@ -18,7 +18,7 @@ class QS extends Proc{
 
 	//variables for measuring timespent
 	public int leftQ = 0, numBatchesT = 0, countT = 0;
-	public double timeSpent = 0, batchT = 0, allBatchesT = 0, allTimes = 0;
+	public double timeSpent = 0, batchT = 0, allBatchesT = 0, finishTimes = 0;
 	Random slump = new Random();
 
 	//variables for batches customers
@@ -51,7 +51,7 @@ class QS extends Proc{
 				Customer removed = queue.remove();
 
 				if(startMeasuring){
-					allTimes += (time - removed.startTime);
+					finishTimes += (time - removed.startTime);
 					batchT += (time - removed.startTime);
 					leftQ++;
 					countT++; 
@@ -85,7 +85,7 @@ class QS extends Proc{
 			double newMean = accumulated/noMeasurements;
 			double variance = mean - newMean;
 
-			if ((variance <= 0 && variance > -1 ) || (variance >= 0 && variance < 1)) { steady++;}
+			if ((variance <= 0 && variance > -1.5 ) || (variance >= 0 && variance < 1.5)) { steady++;}
 			else{ steady = 0; }
 
 			mean = newMean;
