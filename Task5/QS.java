@@ -40,11 +40,8 @@ class QS extends Proc{
 			case READY:{
 				Customer removed = queue.remove();
 
-				//don't take any measurments until we start finish warmup
-				if(startMeasuring){
-					finishTimes += (time - removed.startTime);
-					leftQ++;
-				}
+				finishTimes += (time - removed.startTime);
+				leftQ++;
 			
 				if (sendTo != null){
 					SignalList.SendSignal(ARRIVAL, sendTo, time);

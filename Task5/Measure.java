@@ -2,7 +2,7 @@ import java.util.Random;
 
 //this class is used to measure all batches in all queues and input it into a .m file
 public class Measure extends Proc {
-	private String textfile = "Task5/";
+	private String textfile = "Task5/matlab-files/";
 
 	private String chosenMethod;
 	private String chosenMean;
@@ -57,9 +57,7 @@ public class Measure extends Proc {
 			}
 			break;
 			case MEASURET:{
-				if (allQueues[0].leftQ > 5){ //just to make sure some customers have left	
-					measureTime();
-				}
+				measureTime();
 				SignalList.SendSignal(MEASURET, this, time + 2*slump.nextDouble());
 			}
 			break;
