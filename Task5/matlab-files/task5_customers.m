@@ -1,5 +1,5 @@
 %MEAN ARRIVAL 0.12 Customers
-x = [1:.01:5];
+x = [1:.01:5]; %THIS IS FOR THE BELLCURVE, can be adjusted
 %Random
 C1_RAND = fopen('customers1-RAND.m');
 y_C1_RAND = fscanf(C1_RAND, '%f');

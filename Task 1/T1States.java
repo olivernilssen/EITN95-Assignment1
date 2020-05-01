@@ -78,11 +78,14 @@ class T1State extends T1GlobalSimulation{
 	//Checks the variance between old mean and new mean to get it as low as possible for 
 	//a set amount of measurments before we start taking samples for our test
 	private void measure() {
+		double newMean = accumulated/unsteadyMeasurment;
+		double p = arrivalrate/newMean;
+		System.out.println(p + " is in warmup: " + warmup);
 		//check if warmup time is still true
 		if (warmup){
 			unsteadyMeasurment++;
 			accumulated += numbQ2;
-			double newMean = accumulated/unsteadyMeasurment;
+			newMean = accumulated/unsteadyMeasurment;
 			
 			double variance = mean - newMean;
 
