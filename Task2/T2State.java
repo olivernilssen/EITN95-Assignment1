@@ -1,14 +1,19 @@
 import java.util.*;
 
 class T2State extends T2GlobalSimulation {
-	// Here follows the state variables and other variables that might be needed
-	// e.g. for measurements, runningjobs and lambda
-	private double d = 1, lambda = 150, m = 0.1, mean = 0;
-	public int accumulated = 0, noMeasurements = 0, unsteadyMeasurment = 0;
-	public int totalArrivals = 0, steady = 0;
+	//variables for starting simulation
+	private double d = 1, lambda = 150, m = 0.1, mean = 0; 
+	public double Xa = 0.002, Xb = 0.004;
+
+	//variables for warmup
+	public int totalArrivals = 0, steady = 0, unsteadyMeasurment = 0;
+
+	//variables for measuring
+	public int accumulated = 0, noMeasurements = 0;
+	
+	//variables for during simulation	
 	public boolean Arunning = false, Brunning = false, warmup = true;
 	public int queue_A = 0, queue_B = 0;
-	public double Xa = 0.002, Xb = 0.004;
 
 	Random slump = new Random(); // This is just a random number generator
 
@@ -16,7 +21,7 @@ class T2State extends T2GlobalSimulation {
 		return (Math.log(1.0-Math.random())/-L);
 	}
 	
-	T2SimpleFileWriter W = new T2SimpleFileWriter("Task2/customersB.m", false);
+	SimpleFileWriter W = new SimpleFileWriter("Task2/customersB.m", false);
 
 	// The following method is called by the main program each time a new event has been fetched
 	// from the event list in the main loop. 
@@ -37,7 +42,8 @@ class T2State extends T2GlobalSimulation {
 		}
 	}
 	
-	// The following methods defines what should be done when an event takes place. 
+	//Arrival method, adds a new arrival in to queue of job A
+	//start job of type A if no jobs are running
 	private void arrival(){
 		totalArrivals++;
 		queue_A++;
@@ -75,6 +81,9 @@ class T2State extends T2GlobalSimulation {
 		}
 	}
 
+	//take a job "out of" delay
+	//add a job to type B queue and 
+	//start a job if no job is running
 	private void delay(){
 		queue_B++;
 
@@ -90,6 +99,8 @@ class T2State extends T2GlobalSimulation {
 		}
 	}
 	
+	//method to take measurments, but not until 
+	//system has reached steady state
 	private void measure(){
 		//check if warmup time is still true
 		if (warmup){

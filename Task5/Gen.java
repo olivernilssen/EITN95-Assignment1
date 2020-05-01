@@ -47,6 +47,7 @@ class Gen extends Proc{
 		else if (method == SQF){
 			QS [] temp = new QS[5];
 			temp[0] = allQueues[0];
+
 			int i = 1;
 			for (QS queue : allQueues){
 				if (temp[0] != queue) {

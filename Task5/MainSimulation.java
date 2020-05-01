@@ -12,12 +12,16 @@ public class MainSimulation extends Global{
 		Signal actSignal;
 		new SignalList();
 
-		// Here process instances are created (5 queues and one generator) and their
-		// parameters are given values.
+		//Change these values, and the correct values will be applied to 
+		//both measuring files(for matlab) and for the generator
+		global_method = RAND;
+		global_mean = 0.12;
 
+		// Create the process Measure, that measures values 
+		//in the system
 		Measure measure = new Measure();
-		SignalList.SendSignal(MEASUREC, measure, time);
-		SignalList.SendSignal(MEASURET, measure, time);
+		SignalList.SendSignal(WARMUP, measure, time);
+
 		//initialise the queues we are using and add them to the global 
 		//list allQueues.
 		for (int i = 0; i < allQueues.length; i++){
@@ -28,35 +32,25 @@ public class MainSimulation extends Global{
 			SignalList.SendSignal(MEASURE, allQueues[i], time);
 		}
 
+		//initialize the generator and set values (this can also be done in the gen as 
+		//the values are now global)
 		Gen Generator = new Gen();
-		Generator.lambda = 1.5; // Generator sets uniform arrival time to be 0.12
-		Generator.method = ROUNDROBIN; //choose which method to use for queue selection
+		Generator.lambda = global_mean; // Generator sets uniform arrival time to be 0.12
+		Generator.method = global_method; //choose which method to use for queue selection
 
 		// To start the simulation the first signals are put in the signal list
 		SignalList.SendSignal(READY, Generator, time);
 
 		// This is the main loop
-		while (time < 200000) {
+		while (time < 100000) {
 			actSignal = SignalList.FetchSignal();
 			time = actSignal.arrivalTime;
 			actSignal.destination.TreatSignal(actSignal);
 		}
 
-		// Finally the result of the simulation is printed below:
-		double allAccumulated = 0, allMeasurments = 0, allTimes = 0, allLeft = 0;
-		
-		for (QS q : allQueues){
-			allTimes += q.allBatchesT; 
-			allLeft += q.numBatchesT;
-			allAccumulated += q.allBatchesC;
-			allMeasurments += q.numBatchesC;
-			// double mean = 1.0 * q.accumulated/q.noMeasurements;
-			// System.out.println("numb: " + q.Qnumb + " mean: " + mean + " timespent " + (q.timeSpent/q.leftQ));
-		}
-
 		measure.Cw.close();
 		measure.Tw.close();
-		System.out.println("Mean number of customers in queuing system: " + df.format(1.0 * allAccumulated / allMeasurments));
-		System.out.println("Mean number spent in queue: " + df.format(1.0 * allTimes / allLeft));
+		System.out.println("Mean number of customers in queuing system: " + df.format(1.0 * measure.allBatchC / measure.noBatchesC));
+		System.out.println("Mean number spent in queue: " + df.format(1.0 * measure.allBatchT / measure.noBatchesT));
 	}
 }

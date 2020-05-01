@@ -4,21 +4,24 @@ import java.io.*;
 public class T6MainSimulation extends T6Global{
 
 	public static void main(String[] args) throws IOException {
-		T6SimpleFileWriter TS = new T6SimpleFileWriter("Task6/timespent.m", false);
-		T6SimpleFileWriter TF = new T6SimpleFileWriter("Task6/timefinished.m", false);
-		// The signal list is started and actSignal is declaree. actSignal is the latest
-		// signal that has been fetched from thesignal list in the main loop below.
+		SimpleFileWriter TS = new SimpleFileWriter("Task6/timespent.m", false);
+		SimpleFileWriter TF = new SimpleFileWriter("Task6/timefinished.m", false);
+		
+		//variables for the batch count
 		double batchWait = 0, allBatchesWait = 0;
 		double allFinishwork = 0;
 		int i = 0, N = 1000; //i = iteration, N = days we want done
 		int batchSize = 10; //size of each batch
 		int count = 0; //to count what batch we are on right now
 
+		//signal lsit
 		T6Signal actSignal = new T6Signal();
 		new T6SignalList();	
-		T6QS pharmacist = new T6QS();
-		//T6SignalList.SendSignal(MEASURE, pharmacist, time);
 
+		//our "queue" aka. pharmacist 
+		T6QS pharmacist = new T6QS();
+
+		
 		T6Gen Generator = new T6Gen();
 		Generator.lambda = 4; //h-1 : Poisson arrival, unit given in hours (will be converted)
 		Generator.sendTo = pharmacist; // choose where to send new costomers (we only have one pharmacist)

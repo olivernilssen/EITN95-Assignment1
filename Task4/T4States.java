@@ -1,22 +1,25 @@
 import java.util.*;
 
 class T4State extends T4GlobalSimulation{
-	
-	// Here follows the state variables and other variables that might be needed
-	// e.g. for measurements
+	//variables for simulation
 	public int N = 100, x = 10, lambda = 4, T = 4;
-	public int beingServed = 0, rejected = 0, finished = 0, accumulated = 0, 
-				noMeasurements = 0, unsteadyMeasurments, totalArrivals = 0, steady = 0;
-	public double accumulatedStart = 0, mean = 0;
+	public int beingServed = 0, rejected = 0, finished = 0;
+
+	//variables for warmup
+	private int unsteadyMeasurments, steady = 0;
+	private double mean = 0;
 	public boolean warmup = true;
+	
+	//variables for measuring	
+	public double accumulated = 0, noMeasurements = 0;
+	public double accumulatedStart = 0;
 
 	//calculate the arrival of next arrival from poisson
 	public double poisson(double L) {
 		return (Math.log(1.0-Math.random())/-L);
 	}
 
-	T2SimpleFileWriter W = new T2SimpleFileWriter("Task4/customers1.m", false);
-
+	SimpleFileWriter W = new SimpleFileWriter("Task4/customers1.m", false);
 	Random slump = new Random(); // This is just a random number generator
 	
 	// The following method is called by the main program each time a new event has been fetched
@@ -39,8 +42,7 @@ class T4State extends T4GlobalSimulation{
 	//the number of servers, if not we start serving otherwise reject. 
 	//Create new arrival event
 	private void arrival(){
-		totalArrivals++;
-
+		
 		if (beingServed < N){
 			beingServed++;
 			insertEvent(DEPART, time + x);
@@ -58,6 +60,7 @@ class T4State extends T4GlobalSimulation{
 	}
 	
 	//measure how many customers are being served in the system
+	//but check if it's reached steady state first
 	private void measure(){
 		if (warmup){
 			unsteadyMeasurments++;

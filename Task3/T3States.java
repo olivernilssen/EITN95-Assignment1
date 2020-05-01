@@ -1,22 +1,28 @@
 import java.util.*;
+import java.util.Queue;
 
 class T3State extends T3GlobalSimulation{
-	
-	// Here follows the state variables and other variables that might be needed
-	// e.g. for measurements
-	public int numbQ1 = 0, numbQ2 = 0,  accumulated = 0, noMeasurements = 0; 
-	public int totalArrivals = 0, steady = 0, unsteadyMeasurment = 0;
-	public int serviceT = 1;
-	public double arrival = 1.1, m = 0.5;
-	public double accumulatedStart = 0, mean = 0;
-	public boolean warmup = true, sched1Depart = false, sched2Depart = false;
+	//variables for simulation
+	private int serviceT = 1;
+	private double arrival = 1.1, m = 0.5;
+
+	//variables for warmup
+	private double mean = 0;
+	private boolean warmup = true, sched1Depart = false, sched2Depart = false;
+	private int steady = 0, unsteadyMeasurment = 0;
+
+	//variables for measuring
+	public int accumulated = 0, noMeasurements = 0; 
+	public int totalArrivals = 0;	
 	public int leftQ2 = 0;
+	public double accumulatedStart = 0;
 
-	T3Queue <Integer> Q1 = new T3QueueList<Integer>();
-	T3Queue <Integer> Q2 = new T3QueueList<Integer>();
+	Queue <T3Customer> Q1 = new LinkedList<>();
+	Queue <T3Customer> Q2 = new LinkedList<>();
 	
-	T3SimpleFileWriter W = new T3SimpleFileWriter("Task3/customers11.m", false);
+	SimpleFileWriter W = new SimpleFileWriter("Task3/customers11.m", false);
 
+	//calculate the exponential distribution based on mean
 	public double getExpo(double mean) {
 		return Math.log(1-slump.nextDouble())/(-1/mean);
 	}
@@ -46,7 +52,7 @@ class T3State extends T3GlobalSimulation{
 	//insert new arrival
 	private void arrival(){
 		totalArrivals++;
-		Q1.insert(totalArrivals, time);
+		Q1.add(new T3Customer(totalArrivals, time));
 		
 		if (Q1.size() == 1 && sched1Depart == false){
 			insertEvent(DEPART1, time + getExpo(serviceT));
@@ -62,9 +68,8 @@ class T3State extends T3GlobalSimulation{
 	//start new departure from 1 if the size is bigger than 0
 	private void departure1(){
 		sched1Depart = false;
-		Q2.insert(Q1.jobnr(), Q1.startTime());
-		Q1.delete();
-
+		Q2.add(Q1.remove());
+		
 		if (Q2.size() == 1 && sched2Depart == false){
 			insertEvent(DEPART2, time + getExpo(serviceT));
 			sched2Depart = true;
@@ -79,10 +84,9 @@ class T3State extends T3GlobalSimulation{
 	//in the queue, start serving them and insert new departure 
 	private void departure2(){
 		sched2Depart = false;
-	
-		double timeSpent = time - Q2.startTime();
-		accumulatedStart += timeSpent;		
-		Q2.delete();
+		T3Customer removed = Q2.remove();
+
+		accumulatedStart += (time - removed.getStartTime());		
 
 		if (Q2.size() > 0 && sched2Depart == false){
 			insertEvent(DEPART2, time + getExpo(serviceT));
@@ -92,6 +96,8 @@ class T3State extends T3GlobalSimulation{
 		leftQ2++;
 	}
 	
+	//measure, but first check if simulation is still in 
+	//warmup state or steady-state
 	private void measure(){
 		if (warmup){
 			unsteadyMeasurment++;
@@ -100,12 +106,8 @@ class T3State extends T3GlobalSimulation{
 			
 			double variance = mean - newMean;
 
-			if ((variance <= 0 && variance > -3 ) || (variance >= 0 && variance < 3)){
-				steady++;
-			}
-			else{
-				steady = 0;
-			}
+			if ((variance <= 0 && variance > -3 ) || (variance >= 0 && variance < 3)){ steady++; }
+			else{ steady = 0; }
 
 			mean = newMean;
 

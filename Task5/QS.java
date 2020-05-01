@@ -7,28 +7,18 @@ import java.util.Queue;
 class QS extends Proc{
 	//variables for simulation
 	public int Qnumb;
-	private double m = 2, s = 0.5; //measurment and servicetimes 
+	private double s = 0.5; //servicetimes 
 	private int totalArrivals = 0;
 	public Proc sendTo;
 	public Proc measurproc;
-
-	//variables for warmup
-	private boolean warmup = true;
-	private double steady = 0, noMeasurements = 0, mean = 0, accumulated = 0;
 
 	//variables for measuring timespent
 	public int leftQ = 0, numBatchesT = 0, countT = 0;
 	public double timeSpent = 0, batchT = 0, allBatchesT = 0, finishTimes = 0;
 	Random slump = new Random();
 
-	//variables for batches customers
-	private int batchSize = 15, countC = 0;
-	public double batchC = 0, allBatchesC = 0; 
-	public int numBatchesC = 0;
-
 	//queue too keep track of all customers
 	Queue<Customer> queue = new LinkedList<>();
-
 
 
 	//exponential arrival time, get next value
@@ -50,18 +40,10 @@ class QS extends Proc{
 			case READY:{
 				Customer removed = queue.remove();
 
+				//don't take any measurments until we start finish warmup
 				if(startMeasuring){
 					finishTimes += (time - removed.startTime);
-					batchT += (time - removed.startTime);
 					leftQ++;
-					countT++; 
-	
-					if(countT > batchSize){
-						numBatchesT++;
-						allBatchesT += (batchT/batchSize);
-						countT = 0; 
-						batchT = 0;
-					}
 				}
 			
 				if (sendTo != null){
@@ -71,43 +53,6 @@ class QS extends Proc{
 					SignalList.SendSignal(READY, this, time + getExpo(s));
 				}
 			} break;
-
-			case MEASURE:{
-				measure();
-			} break;
 		}
-	}
-
-	private void measure(){
-		if (warmup){
-			noMeasurements++;
-			accumulated += queue.size();
-			double newMean = accumulated/noMeasurements;
-			double variance = mean - newMean;
-
-			if ((variance <= 0 && variance > -1.5 ) || (variance >= 0 && variance < 1.5)) { steady++;}
-			else{ steady = 0; }
-
-			mean = newMean;
-
-			if(steady == 250){
-				warmup = false;
-				startMeasuring = true;
-				accumulated = 0;
-				noMeasurements = 0;
-			}
-		}
-		else {
-			batchC += queue.size();
-			countC++;
-			if (countC > batchSize){
-				allBatchesC += (batchC/batchSize);
-				batchC = 0;
-				countC = 0; 
-				numBatchesC++;
-			}
-		}
-		
-		SignalList.SendSignal(MEASURE, this, time + m*slump.nextDouble());
 	}
 }

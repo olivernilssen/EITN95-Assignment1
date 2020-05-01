@@ -10,7 +10,7 @@ public class T2MainSimulation extends T2GlobalSimulation{
         insertEvent(MEASURE, 0.1);
         
         // The main simulation loop
-    	while (actState.noMeasurements < 2000){
+    	while (actState.noMeasurements < 3000){
     		actEvent = T2eventList.fetchEvent();
     		time = actEvent.eventTime;
 			actState.treatEvent(actEvent);
